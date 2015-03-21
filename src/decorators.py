@@ -11,7 +11,7 @@
 from oyoyo.parse import parse_nick
 import fnmatch
 import botconfig
-import src.settings as var
+from src import var
 from src import logger
 
 adminlog = logger(None)

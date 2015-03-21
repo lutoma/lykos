@@ -20,7 +20,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from oyoyo.parse import parse_nick
-import src.settings as var
+from src import var
 import botconfig
 import traceback
 from src import decorators

@@ -8,7 +8,7 @@ from oyoyo.parse import parse_nick
 import imp
 from src import logger
 import socket
-from src import settings as var
+from src import var
 from src import wolfgame
 
 log = logger("errors.log")
