@@ -113,6 +113,7 @@ if botconfig.DEBUG_MODE:
     var.IDLE_STASIS_PENALTY = 1
     var.PART_STASIS_PENALTY = 1
 
+plog("Loading werewolf IRC bot")
 
 def connect_callback(cli):
     SIGUSR1 = getattr(signal, "SIGUSR1", None)
