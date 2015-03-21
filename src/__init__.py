@@ -1,6 +1,8 @@
 import argparse
 import botconfig
-from src import settings as var
+from src import settings
+
+var = settings.SettingsAPI()
 
 # Todo: Allow game modes to be set via config
 
