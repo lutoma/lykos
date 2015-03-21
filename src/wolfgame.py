@@ -81,8 +81,6 @@ var.AFTER_FLASTGAME = None
 var.PINGING_IFS = False
 var.TIMERS = {}
 
-var.ORIGINAL_SETTINGS = {}
-
 var.LAST_SAID_TIME = {}
 
 var.GAME_START_TIME = datetime.now()  # for idle checker only
@@ -314,9 +312,7 @@ def pm(cli, target, message):  # message either privmsg or notice, depending on 
     cli.msg(target, message)
 
 def reset_settings():
-    for attr in list(var.ORIGINAL_SETTINGS.keys()):
-        setattr(var, attr, var.ORIGINAL_SETTINGS[attr])
-    dict.clear(var.ORIGINAL_SETTINGS)
+    var.clear()
 
 def reset_modes_timers(cli):
     # Reset game timers
@@ -2358,18 +2354,18 @@ def del_player(cli, nick, forced_death = False, devoice = True, end_game = True,
                                 pl.remove(target)
 
                 if nickrole == "time lord":
-                    if "DAY_TIME_LIMIT" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["DAY_TIME_LIMIT"] = var.DAY_TIME_LIMIT
-                    if "DAY_TIME_WARN" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["DAY_TIME_WARN"] = var.DAY_TIME_WARN
-                    if "SHORT_DAY_LIMIT" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["SHORT_DAY_LIMIT"] = var.SHORT_DAY_LIMIT
-                    if "SHORT_DAY_WARN" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["SHORT_DAY_WARN"] = var.SHORT_DAY_WARN
-                    if "NIGHT_TIME_LIMIT" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["NIGHT_TIME_LIMIT"] = var.NIGHT_TIME_LIMIT
-                    if "NIGHT_TIME_WARN" not in var.ORIGINAL_SETTINGS:
-                        var.ORIGINAL_SETTINGS["NIGHT_TIME_WARN"] = var.NIGHT_TIME_WARN
+                    if "DAY_TIME_LIMIT" not in var:
+                        var["DAY_TIME_LIMIT"] = var.DAY_TIME_LIMIT
+                    if "DAY_TIME_WARN" not in var:
+                        var["DAY_TIME_WARN"] = var.DAY_TIME_WARN
+                    if "SHORT_DAY_LIMIT" not in var:
+                        var["SHORT_DAY_LIMIT"] = var.SHORT_DAY_LIMIT
+                    if "SHORT_DAY_WARN" not in var:
+                        var["SHORT_DAY_WARN"] = var.SHORT_DAY_WARN
+                    if "NIGHT_TIME_LIMIT" not in var:
+                        var["NIGHT_TIME_LIMIT"] = var.NIGHT_TIME_LIMIT
+                    if "NIGHT_TIME_WARN" not in var:
+                        var["NIGHT_TIME_WARN"] = var.NIGHT_TIME_WARN
                     var.DAY_TIME_LIMIT = var.TIME_LORD_DAY_LIMIT
                     var.DAY_TIME_WARN = var.TIME_LORD_DAY_WARN
                     var.SHORT_DAY_LIMIT = var.TIME_LORD_DAY_LIMIT
@@ -5751,7 +5747,7 @@ def transition_night(cli):
 
 def cgamemode(cli, arg):
     chan = botconfig.CHANNEL
-    if var.ORIGINAL_SETTINGS:  # needs reset
+    if var:  # needs reset
         reset_settings()
 
     modeargs = arg.split("=", 1)
@@ -5765,7 +5761,6 @@ def cgamemode(cli, arg):
                 val = getattr(gm, attr)
                 if (hasattr(var, attr) and not callable(val)
                                         and not attr.startswith("_")):
-                    var.ORIGINAL_SETTINGS[attr] = getattr(var, attr)
                     setattr(var, attr, val)
             var.CURRENT_GAMEMODE = md
             return True
@@ -5858,7 +5853,7 @@ def start(cli, nick, chan, forced = False, restart = ""):
         cli.msg(chan, "{0}: No game settings are defined for \u0002{1}\u0002 player games.".format(nick, len(villagers)))
         return
 
-    if var.ORIGINAL_SETTINGS and not restart:  # Custom settings
+    if var and not restart:  # Custom settings
         while True:
             wvs = sum(addroles[r] for r in var.WOLFCHAT_ROLES)
             if len(villagers) < (sum(addroles.values()) - sum([addroles[r] for r in var.TEMPLATE_RESTRICTIONS.keys()])):
@@ -5970,7 +5965,7 @@ def start(cli, nick, chan, forced = False, restart = ""):
                 possible.remove(cannotbe)
         if len(possible) < len(var.ROLES[template]):
             cli.msg(chan, "Not enough valid targets for the {0} template.".format(template))
-            if var.ORIGINAL_SETTINGS:
+            if var:
                 var.ROLES = {"person": var.ALL_PLAYERS}
                 reset_settings()
                 cli.msg(chan, "The default settings have been restored. Please !start again.")
@@ -6786,9 +6781,9 @@ def listroles(cli, nick, chan, rest):
             if hasattr(mode, "ROLE_INDEX") and hasattr(mode, "ROLE_GUIDE"):
                 roleindex = getattr(mode, "ROLE_INDEX")
                 roleguide = getattr(mode, "ROLE_GUIDE")
-            elif gamemode == "default" and "ROLE_INDEX" in var.ORIGINAL_SETTINGS and "ROLE_GUIDE" in var.ORIGINAL_SETTINGS:
-                roleindex = var.ORIGINAL_SETTINGS["ROLE_INDEX"]
-                roleguide = var.ORIGINAL_SETTINGS["ROLE_GUIDE"]
+            elif gamemode == "default" and "ROLE_INDEX" in var and "ROLE_GUIDE" in var:
+                roleindex = var["ROLE_INDEX"]
+                roleguide = var["ROLE_GUIDE"]
             rest.pop(0)
         else:
             if gamemode in var.GAME_MODES and var.GAME_MODES[gamemode][4]:
