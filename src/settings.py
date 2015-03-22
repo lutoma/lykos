@@ -37,7 +37,7 @@ class SettingsAPI:
             return getattr(functions, item)
         if item == "clear":
             return super().__getattribute__("clear")
-        raise AttributeError("no such setting or function: " + item)
+        raise AttributeError("no such function or variable: " + item)
 
     def __setattr__(self, item, value):
         if not hasattr(defaultsettings, item.upper()):
