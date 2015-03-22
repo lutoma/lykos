@@ -17,11 +17,13 @@ class SettingsDict(dict):
 class SettingsAPI:
     def __init__(self):
         super().__setattr__("_settings", SettingsDict())
-        super().__setattr__("_non_settings", [])
+        super().__setattr__("_non_settings", SettingsDict())
 
     def __getattribute__(self, item):
-        if not hasattr(defaultsettings, item.upper()):
+        if not hasattr(defaultsettings, item.upper()) and item not in super().__getattribute__("_non_settings"):
             raise AttributeError
+        if item in super().__getattribute__("_non_settings"):
+            return super().__getattribute__("_non_settings")[item]
         if item in super().__getattribute__("_settings"):
             return super().__getattribute__("_settings")[item]
         return getattr(botconfig, item.upper(), getattr(defaultsettings, item.upper()))
@@ -36,16 +38,12 @@ class SettingsAPI:
 
     def __setattr__(self, item, value):
         if not hasattr(defaultsettings, item.upper()):
-            setattr(defaultsettings, item.upper(), value)
-            super().__getattribute__("_non_settings").append(item.upper())
-        elif item.upper() in super().__getattribute__("_non_settings"):
-            setattr(defaultsettings, item.upper(), value)
+            super().__getattribute__("_non_settings")[item] = value
         else:
             super().__getattribute__("_settings")[item] = value
 
     def __delattr__(self, item):
         if item.upper() in super().__getattribute__("_non_settings"):
-            delattr(defaultsettings, item.upper())
             del super().__getattribute__("_non_settings")[item]
         if item in super().__getattribute__("_settings"):
             del super().__getattribute__("_settings")[item]
