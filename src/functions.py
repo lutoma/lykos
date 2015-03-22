@@ -1,8 +1,8 @@
-from src import defaultsettings as var
-
 import botconfig
 import fnmatch
 import random
+
+from src import var
 
 is_role = lambda plyr, rol: rol in var.ROLES and plyr in var.ROLES[rol]
 
