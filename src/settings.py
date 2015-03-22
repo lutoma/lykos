@@ -1,4 +1,5 @@
 from src import defaultsettings
+from src import functions
 import botconfig
 
 class SettingsDict(dict):
@@ -27,8 +28,8 @@ class SettingsAPI:
         return getattr(botconfig, item.upper(), getattr(defaultsettings, item.upper()))
 
     def __getattr__(self, item):
-        if hasattr(defaultsettings, item):
-            return getattr(defaultsettings, item)
+        if hasattr(functions, item):
+            return getattr(functions, item)
         if item == "clear":
             return super().__getattribute__("clear")
         raise AttributeError("no such setting or function: " + item)
