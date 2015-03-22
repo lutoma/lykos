@@ -5,6 +5,9 @@ class SettingsDict(dict):
     def __getitem__(self, item):
         return super().__getitem__(item.upper())
 
+    def __missing__(self, item):
+        return None
+
     def __setitem__(self, item, value):
         super().__setitem__(item.upper(), value)
 
