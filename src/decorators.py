@@ -13,6 +13,7 @@ import fnmatch
 import botconfig
 from src import var
 from src import logger
+from src import functions
 
 adminlog = logger(None)
 
@@ -81,43 +82,22 @@ def generate(fdict, permissions=True, **kwargs):
                             break
                     else:
                         return
-                if acc:
-                    for pattern in var.DENY_ACCOUNTS.keys():
-                        if fnmatch.fnmatch(acc.lower(), pattern.lower()):
-                            for cmdname in s:
-                                if cmdname in var.DENY_ACCOUNTS[pattern]:
-                                    largs[0].notice(nick, "You do not have permission to use that command.")
-                                    return
-                    for pattern in var.ALLOW_ACCOUNTS.keys():
-                        if fnmatch.fnmatch(acc.lower(), pattern.lower()):
-                            for cmdname in s:
-                                if cmdname in var.ALLOW_ACCOUNTS[pattern]:
-                                    if admin_only or owner_only:
-                                        adminlog(largs[2], rawnick, s[0], largs[3])
-                                    return f(*largs)
-                if not var.ACCOUNTS_ONLY and cloak:
-                    for pattern in var.DENY.keys():
-                        if fnmatch.fnmatch(cloak.lower(), pattern.lower()):
-                            for cmdname in s:
-                                if cmdname in var.DENY[pattern]:
-                                    largs[0].notice(nick, "You do not have permission to use that command.")
-                                    return
-                    for pattern in var.ALLOW.keys():
-                        if fnmatch.fnmatch(cloak.lower(), pattern.lower()):
-                            for cmdname in s:
-                                if cmdname in var.ALLOW[pattern]:
-                                    if admin_only or owner_only:
-                                        adminlog(largs[2], rawnick, s[0], largs[3])
-                                    return f(*largs)  # no questions
+                if functions.is_allowed(nick, s, cloak):
+                    if admin_only or owner_only:
+                        adminlog(largs[2], rawnick, s[0], largs[3])
+                    return f(*largs)
+                if functions.is_denied(nick, s, cloak):
+                    largs[0].notice(nick, "You do not have permission to use that command.")
+                    return
                 if owner_only:
-                    if var.is_owner(nick, cloak):
+                    if functions.is_owner(nick, cloak):
                         adminlog(largs[2], rawnick, s[0], largs[3])
                         return f(*largs)
                     else:
                         largs[0].notice(nick, "You are not the owner.")
                         return
                 if admin_only:
-                    if var.is_admin(nick, cloak):
+                    if functions.is_admin(nick, cloak):
                         adminlog(largs[2], rawnick, s[0], largs[3])
                         return f(*largs)
                     else:
