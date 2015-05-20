@@ -246,6 +246,15 @@ QUIT_MESSAGES_NO_REVEAL = ("\u0002{0}\u0002 suddenly falls over dead before the 
                            "\u0002{0}\u0002 is crushed to death by a falling tree. The villagers desperately try to save them, but it is too late.",
                            "\u0002{0}\u0002 suddenly bursts into flames and is now all but a memory.")
 
+# Sane defaults for some optional config options.
+# See botconfig.py.example for documentation.
+DISABLED_GAMEMODES = []
+ALT_CHANNELS = ""
+ALLOWED_ALT_CHANNELS_COMMANDS = []
+USE_UTC = True
+TIMESTAMP_FORMAT = "[%Y-%m-%d %H:%M:%S{tzoffset}]"
+PASTEBIN_ERRORS = False
+DEV_CHANNEL = ""
 GIF_CHANCE = 1/50
 FORTUNE_CHANCE = 1/25
 
