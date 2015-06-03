@@ -3702,6 +3702,13 @@ def choose_target(actor, nick):
                 if var.ALL_PLAYERS[i] in pl:
                     nick = var.ALL_PLAYERS[i]
                     break
+    debuglog("ACTOR IS WOLF: {0}".format(actor in var.WOLF_ROLES))
+    debuglog("SHEEP: {0}".format(var.ROLES["sheep"]))
+
+    if (var.get_role(actor) in var.WOLF_ROLES and
+            len(var.ROLES["sheep"]) > 0 and
+            random.random() < var.SHEEP_STEALS_KILL_CHANCE):
+        nick = random.choice(var.ROLES["sheep"])
     return nick
 
 # returns true if a swap happened
@@ -5440,6 +5447,14 @@ def transition_night(cli):
             pm(cli, drunk, "You have been drinking too much! You are the \u0002village drunk\u0002.")
         else:
             pm(cli, drunk, "You are the \u0002village drunk\u0002.")
+
+    for sheep in var.ROLES["sheep"]:
+        if sheep in var.PLAYERS and not is_user_simple(sheep):
+            chance = math.floor(var.SHEEP_STEALS_KILL_CHANCE * 100)
+            pm(cli, sheep, "You are a \u0002sheep\u0002. You have a {0}% chance to be killed "
+                           "instead of the wolves' actual target.".format(chance))
+        else:
+            pm(cli, sheep, "You are a \u0002sheep\u0002.")
 
     max_totems = {}
     for sham in var.TOTEM_ORDER:
