@@ -3702,9 +3702,6 @@ def choose_target(actor, nick):
                 if var.ALL_PLAYERS[i] in pl:
                     nick = var.ALL_PLAYERS[i]
                     break
-    debuglog("ACTOR IS WOLF: {0}".format(actor in var.WOLF_ROLES))
-    debuglog("SHEEP: {0}".format(var.ROLES["sheep"]))
-
     if (var.get_role(actor) in var.WOLF_ROLES and
             len(var.ROLES["sheep"]) > 0 and
             random.random() < var.SHEEP_STEALS_KILL_CHANCE):
