@@ -773,6 +773,18 @@ def altpinger(cli, nick, chan, rest):
             msg.append("Your ping preferences have been set to {0}.".format(num))
             toggle_altpinged_status(nick, num)
 
+    elif re.search(r"^(?i)inf(?:init[ey])$", rest[0]):
+        msg.append("Okay, I'll ping you when hell freezes over, then.")
+
+    elif rest[0].endswith("i"):
+        num = int(re.search(r"^([0-9]*)i$", rest[0]).group(1) or 1)
+        msg.append("Your ping preferences have been set to {0}.".format(rest[0]))
+        if chan == nick:
+            msg.append("Or maybe I just imagined that.")
+        else:
+            cli.msg(chan, "PING! {0} player{1}! {2}".format(num, ("" if num == 1 else "s"), nick))
+            cli.msg(chan, "Too bad they're all imaginary.")
+
     else:
         msg.append("Invalid parameter. Please enter a non-negative integer or a valid preference.")
 
