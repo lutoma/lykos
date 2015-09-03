@@ -7,6 +7,15 @@ from collections import defaultdict, OrderedDict
 import botconfig
 from src import events
 
+# a throttle test is performed on connect to determine how many messages the bot
+# can send out without being killed off for flooding
+# these variables manipulate that test, and can be adjusted if bot is killed during testing
+THROTTLE_TEST_NUM_MESSAGES = 30 # this should be larger than THROTTLE_TEST_TB_BURST
+THROTTLE_TEST_BURST_THRESHOLD = 1.5 # decrease this if bot is killed during gameplay
+THROTTLE_TEST_TB_BURST = 20 # decrease this if bot is killed during testing
+THROTTLE_TEST_TB_DELAY = 0.25 # increase this if bot is killed during testing or gameplay
+THROTTLE_TEST_PEAK = 0.9 # decrease this if network lag causes bot to be killed during gameplay
+
 MINIMUM_WAIT = 60
 EXTRA_WAIT = 30
 EXTRA_WAIT_JOIN = 0 # Add this many seconds to the waiting time for each !join
