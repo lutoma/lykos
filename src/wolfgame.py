@@ -4991,18 +4991,17 @@ def retract(cli, nick, chan, rest):
         cli.notice(nick, "You're not currently playing.")
         return
 
-    with var.GRAVEYARD_LOCK:
+    with var.GRAVEYARD_LOCK, var.WARNING_LOCK:
         if var.PHASE == "join":
-            with var.WARNING_LOCK:
-                if not nick in var.START_VOTES:
-                    cli.notice(nick, "You haven't voted to start.")
-                else:
-                    var.START_VOTES.discard(nick)
-                    cli.msg(chan, "\u0002{0}\u0002's vote to start was retracted.".format(nick))
+            if not nick in var.START_VOTES:
+                cli.notice(nick, "You haven't voted to start.")
+            else:
+                var.START_VOTES.discard(nick)
+                cli.msg(chan, "\u0002{0}\u0002's vote to start was retracted.".format(nick))
 
-                    if len(var.START_VOTES) < 1:
-                        var.TIMERS['start_votes'][0].cancel()
-                        del var.TIMERS['start_votes']
+                if len(var.START_VOTES) < 1:
+                    var.TIMERS['start_votes'][0].cancel()
+                    del var.TIMERS['start_votes']
             return
 
     if chan == nick: # PM, use different code
