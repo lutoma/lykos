@@ -1077,4 +1077,140 @@ class SleepyMode(GameMode):
                                       "unleash those evils upon the world. You are now a \u0002demoniac\u0002."))
                 # NOTE: chk_win is called by del_player, don't need to call it here even though this has a chance of ending game
 
+
+@game_mode("zufall", minp = 8, maxp = 24, likelihood = 0)
+class ZufallMode(RandomMode):
+    """A slightly less random random mode curated by lutoma. Attempts to balance teams using points."""
+
+    ROLE_POINTS = {
+      'villager': 1,
+      'seer': 3,
+      'detective': 5,
+      'augur': 4,
+      'prophet': 4,
+      'doctor': 2,
+      'matchmaker': 2,
+      'mystic': 2,
+      'vigilante': 4,
+      'oracle': 2,
+      'shaman': 3,
+      'hunter': 3,
+      'priest': 6,
+      'guardian angel': 5,
+      'bodyguard': 3,
+      'harlot': 5,
+      'village drunk': 1,
+
+      'wolf': 3,
+      'werecrow': 4,
+      'fallen angel': 7,
+      'werekitten': 4,
+      'traitor': 4,
+      'doomsayer': 5,
+      'wolf mystic': 3,
+      'alpha wolf': 5,
+      'sorcerer': 4,
+      'wolf cub': 4,
+      'hag': 3,
+      'warlock': 3,
+      'lycan': 1,
+      'minion': 2,
+      'cultist': 1,
+
+      'monster': 3,
+      'fool': 10,
+      'crazed shaman': 3,
+      'dullahan': 6,
+      'jester': 2,
+      'succubus': 8,
+      'vengeful ghost': 9,
+      'demoniac': 3,
+      'turncoat': 4,
+      'time lord': 2,
+      'clone': 3,
+      'piper': 5,
+      'mad scientist': 4,
+    }
+
+    def get_team(self, role):
+      # Regard some roles as part of different teams for role attribution purposes
+      neutrals = {'vengeful ghost', 'time lord', 'mad scientist'}
+      wolves = {'lycan'}
+
+      if role in var.WOLFTEAM_ROLES or role in wolves:
+        return 'wolf'
+
+      if role in var.TRUE_NEUTRAL_ROLES or role in neutrals:
+        return 'neutral'
+
+      return 'village'
+
+    def role_attribution(self, evt, cli, chk_win_conditions, var, villagers):
+        lpl = len(villagers) - 1
+
+        addroles = evt.data["addroles"]
+        for role in var.ROLE_GUIDE:
+            addroles[role] = 0
+
+        wolves = var.WOLF_ROLES - {"wolf cub"}
+        initial_wolf = random.choice(list(wolves))
+        addroles[initial_wolf] += 1 # make sure there's at least one wolf role
+
+        team_points = {
+          'village': 0,
+          'wolf': self.ROLE_POINTS.get(initial_wolf, 1),
+          'neutral': 0,
+        }
+
+        wolf_roles = set(var.WOLFTEAM_ROLES - var.TEMPLATE_RESTRICTIONS.keys() - {"cultist"})
+        neutral_roles = set(var.TRUE_NEUTRAL_ROLES - var.TEMPLATE_RESTRICTIONS.keys())
+        village_roles = set(var.ROLE_GUIDE.keys() - var.TEMPLATE_RESTRICTIONS.keys() - wolf_roles - neutral_roles - {"villager", "amnesiac"})
+
+        lwolves = 1
+
+        while lpl:
+            possible_roles = set()
+
+            if team_points['neutral'] < (team_points['wolf'] + team_points['village']) / 3:
+              possible_roles |= neutral_roles
+
+            if team_points['village'] >= team_points['wolf'] * 1.6 and lwolves < min(math.floor(math.log(len(villagers)) ** 1.7), 6):
+              possible_roles |= wolf_roles
+            else:
+              possible_roles |= village_roles
+
+            role = random.choice(list(possible_roles))
+
+            # Avoid having too many of one role
+            if role in addroles and addroles[role] >= round(math.log(len(villagers)) * 0.84):
+              # Reroll once
+              role = random.choice(list(possible_roles))
+
+            team = self.get_team(role)
+
+            if team == 'wolf':
+              lwolves += 1
+
+            team_points[team] += self.ROLE_POINTS.get(role, 1)
+            addroles[role] += 1
+            lpl -= 1
+
+        addroles["gunner"] = random.randrange(int(len(villagers) ** 1.2 / 8))
+        addroles["assassin"] = random.randrange(int(len(villagers) ** 1.2 / 8))
+
+        lpl = len(villagers)
+        lwolves = sum(addroles[r] for r in var.WOLFCHAT_ROLES)
+        lcubs = addroles["wolf cub"]
+        lrealwolves = sum(addroles[r] for r in var.WOLF_ROLES - {"wolf cub"})
+        lmonsters = addroles["monster"]
+        ldemoniacs = addroles["demoniac"]
+        ltraitors = addroles["traitor"]
+        lpipers = addroles["piper"]
+        lsuccubi = addroles["succubus"]
+
+        if chk_win_conditions(lpl, lwolves, lcubs, lrealwolves, lmonsters, ldemoniacs, ltraitors, lpipers, lsuccubi, 0, cli, end_game=False):
+            return self.role_attribution(evt, cli, chk_win_conditions, var, villagers)
+
+        evt.prevent_default = True
+
 # vim: set expandtab:sw=4:ts=4:
